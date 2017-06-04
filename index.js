@@ -53,6 +53,7 @@ function parseTableData(dir,callback){
 			}
 			entity["TableName"]=filename.split(".")[0];
 			entity["Clumns"]=[];
+			
 			fs.readFile(file,'utf8',function(err, data){
 			  	if(err){ 
 			  		console.log(err);
