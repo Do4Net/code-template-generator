@@ -1,0 +1,18 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace HY.FinancialCooperation.Data.Entities
+{
+    public partial class <%= model.TableName %> : EntityBase   
+    {
+   		<% model.Clumns&&model.Clumns.forEach(function(clumn){ %> 
+   		 /// <summary>
+        /// 	<%= clumn.AttributeDesc %>
+        /// </summary>
+        public <%= clumn.AttributeType %> <%= clumn.AttributeName %> { get; set; } 
+   		<% }); %>
+    }
+}

@@ -1,0 +1,35 @@
+using HY.BusinessBase;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Runtime.Serialization;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace HY.FinancialCooperation.Common.FinancialCooperation.InputOutput
+{
+    [DataContract]
+    [Serializable]
+    public class <%=model.TableName %>QueryRequest : FinancialCooperationRequestBase
+    {
+        <% model.Clumns&&model.Clumns.forEach(function(clumn){ %> 
+         /// <summary>
+        ///     <%= clumn.AttributeDesc %>
+        /// </summary>
+        [DataMember]
+        public <%= clumn.AttributeType %> <%= clumn.AttributeName %> { get; set; } 
+        <% }); %> 
+
+        [DataMember]
+        public PagingInfo Paging { get; set; }
+    }
+    [DataContract]
+    [Serializable]
+    public class <%=model.TableName %>QueryReply : FinancialCooperationReplyBase
+    {
+        [DataMember]
+        public PagingInfo Paging { get; set; }
+        [DataMember]
+        public List<<%=model.TableName %>> <%=model.TableName %>s { get; set; }
+    }
+}

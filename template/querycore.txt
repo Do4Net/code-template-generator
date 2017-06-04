@@ -1,0 +1,73 @@
+using HY.FinancialCooperation.Common.FinancialCooperation;
+using HY.FinancialCooperation.Common.FinancialCooperation.InputOutput;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace HY.FinancialCooperation.Core.FinancialCooperation
+{
+    class <%=model.TableName %>Query : FinancialCooperationServiceHandlerBase<<%=model.TableName %>QueryRequest, <%=model.TableName %>QueryReply>
+    {
+        IQueryable<HY.FinancialCooperation.Data.Entities.<%=model.TableName %>> query;
+        public <%=model.TableName %>Query()
+        {
+            query = base.FinancialCooperationRepositoryContext.GetRepository<HY.FinancialCooperation.Data.Entities.<%=model.TableName %>>().GetQuery();
+        }
+        protected override int ModelId
+        {
+            get
+            {
+                return base.ModelId;
+            }
+        }
+        protected override void BeforeHandle()
+        {
+            base.BeforeHandle();
+            base.IsLogRequestReply = false;
+            if (HasError)
+                return;
+        }
+        protected override void RealRequestInvoke()
+        {
+            FilterData();
+            Paging();
+            if (HasError) return;
+            reply.<%=model.TableName %>s = new List<<%=model.TableName %>>();
+
+            var list = query.ToList();
+            list.ForEach(p =>
+            {
+                reply.<%=model.TableName %>s.Add(EntityMappers.EntityMapper.Map<HY.FinancialCooperation.Data.Entities.<%=model.TableName %>, <%=model.TableName %>>(p));
+            });
+        }
+
+        private void FilterData()
+        {       
+        <% model.Clumns&&model.Clumns.forEach(function(clumn){ %> 
+            if (<%= clumn.AttributeCondition %>)
+            {
+                query = query.Where(t => t.<%= clumn.AttributeName %> == request.<%= clumn.AttributeName %>);
+            }          
+        <% }); %> 
+            
+        }
+
+        private void Paging()
+        {
+            if (request.Paging == null)
+                return;
+
+            if (request.Paging.Ascending)
+                query = query.OrderBy(o => o.ID);
+            else
+                query = query.OrderByDescending(o => o.ID);
+
+            reply.Paging = request.Paging;
+            reply.Paging.DataCount = query.Count();
+
+            query = query.Skip(reply.Paging.SkipCount).Take(reply.Paging.TakeCount);
+        }
+    }
+}
