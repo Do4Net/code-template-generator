@@ -1,0 +1,59 @@
+------------------------------[Module const id]-----start--------------------------------------
+		<% model&&model.forEach(function(table){%>
+		public const int <%=table.QueryModuleId %>  = MODUEL_ID_BASE + 1;
+		public const int <%=table.AddModuleId %>  	= MODUEL_ID_BASE + 1;
+        <% }); %>
+------------------------------[Module const id]-----start--------------------------------------
+
+
+
+------------------------------[ServiceContract]-----start--------------------------------------
+
+		<% model&&model.forEach(function(table){%>
+	[OperationContract]
+        <%= table.TableName %>QueryReply <%= table.TableName %>Query(<%= table.TableName %>QueryRequest request);
+
+        [OperationContract]
+        AddOrUpdate<%= table.TableName %>Reply AddOrUpdate<%= table.TableName %>(AddOrUpdate<%= table.TableName %>Request request);
+        <% }); %>
+
+------------------------------[ServiceContract]-----end--------------------------------------
+
+
+
+------------------------------[ServiceContract Realization]-----start--------------------------------------
+
+		<% model&&model.forEach(function(table){%>
+        public <%= table.TableName %>QueryReply <%= table.TableName %>Query(<%= table.TableName %>QueryRequest request)
+        {
+            return new <%= table.TableName %>Query().HandleRequest(request);
+        }
+
+        public AddOrUpdate<%= table.TableName %>Reply AddOrUpdate<%= table.TableName %>(AddOrUpdate<%= table.TableName %>Request request)
+        {
+            return new AddOrUpdate<%= table.TableName %>().HandleRequest(request);
+        }
+        <% }); %>
+
+------------------------------[ServiceContract Realization]-----end--------------------------------------
+
+
+
+
+------------------------------[Proxy]-----start--------------------------------------
+
+		<% model&&model.forEach(function(table){%>
+        public <%= table.TableName %>QueryReply <%= table.TableName %>Query(<%= table.TableName %>QueryRequest request)
+        {
+            return BusinessActionExtentions.ExecRequestReplyMethod<<%= table.TableName %>QueryRequest, <%= table.TableName %>QueryReply>
+                  (request, proxy.Create().<%= table.TableName %>Query, request.CustomerId.ToString(), request.ClientIP, FinancialCooperationConst.<%=table.QueryModuleId %>);
+        }
+
+		public AddOrUpdate<%= table.TableName %>Reply AddOrUpdate<%= table.TableName %>(AddOrUpdate<%= table.TableName %>Request request)
+        {
+            return BusinessActionExtentions.ExecRequestReplyMethod<AddOrUpdate<%= table.TableName %>Request, AddOrUpdate<%= table.TableName %>Reply>
+                   (request, proxy.Create().AddOrUpdate<%= table.TableName %>, request.CustomerId.ToString(), request.ClientIP, FinancialCooperationConst.<%=table.AddModuleId %>);
+        }
+        <% }); %>
+
+------------------------------[Proxy]-----start--------------------------------------

@@ -15,6 +15,7 @@ const
 	"DEFAULTNULLint"	 : "Nullable<int>",
 	"DEFAULTNULLbigint"	 : "Nullable<int>",
 	"DEFAULTNULLvarchar" : "string",
+	"DEFAULTNULLtext" : "string",
 	"DEFAULTNULLdatetime": "Nullable<DateTime>",
 	"DEFAULTNULLdecimal" : "Nullable<decimal>"
 };
@@ -34,7 +35,24 @@ var queryCondition=function(type,filed){
 		return `!string.IsNullOrWhiteSpace(request.${filed})`; 
 	}
 }
- 
+var getUnitTestValue=function(type,filed){
+	if(filed==="IsValid"){
+		return '"T"';
+	}
+	switch(type){
+		case "int":
+		return 6; 
+		case "Nullable<int>": 
+		return 6; 
+		case "Nullable<DateTime>": 
+		return "DateTime.Now";
+		case "Nullable<decimal>": 
+		return 6; 
+		default: 
+		return '"unittest"'; 
+	}
+
+} 
 function parseTableData(dir,callback){
 	fs.readdir(dir, function(err, _files){
 		var tables=[],index=_files.length; 
@@ -81,12 +99,16 @@ function parseTableData(dir,callback){
 	});
 }
 
-function buildClass(tables,build){
+function buildClass(tables,build,callback){
 
 	var entityTmp=fs.readFileSync(build.Template).toString("utf-8");
 	tables.forEach(function(table){
 		if(build.ModuleId){
 			table["ModuleId"]=tmpl.simpTmplParse(build.ModuleId,{TableName:table.TableName.toUpperCase()});
+		} 
+
+		if(callback&& typeof callback==="function"){
+			callback(table);
 		} 
 		classInner=tmpl.funcTmplParse(entityTmp,table);
 		fs.writeFile(tmpl.simpTmplParse(build.OutPutFile,table),classInner,function(err){
@@ -153,6 +175,35 @@ function build(){
 		buildConfig.BuildQueryCore.Enable&&buildClass(tables,buildConfig.BuildQueryCore);
 		//生成新增修改core
 		buildConfig.BuildAddOrUpdateCore.Enable&&buildClass(tables,buildConfig.BuildAddOrUpdateCore);
+		//生成数据库实体映射文件
+		buildConfig.BuildEntityTypeConfiguration.Enable&&buildClass(tables,buildConfig.BuildEntityTypeConfiguration);
+		//生成EF层测试单元
+		buildConfig.BuildDataEFUnitTest.Enable&&buildClass(tables,buildConfig.BuildDataEFUnitTest,function(table){
+			table.Clumns.forEach(function(clumn){
+				clumn["AttributeTest"]=getUnitTestValue(clumn.AttributeType,clumn.AttributeName); 
+			}) 	 
+		});
+		//生成core层测试单元
+		buildConfig.BuildCoreUnitTest.Enable&&buildClass(tables,buildConfig.BuildCoreUnitTest,function(table){
+			table.Clumns.forEach(function(clumn){
+				clumn["AttributeTest"]=getUnitTestValue(clumn.AttributeType,clumn.AttributeName);
+			}) 	 
+		});
+
+		//生成服务契约及其实现
+		buildConfig.BuildService.Enable&&(function(tables,build){
+			tables.forEach(function(table){
+				table["QueryModuleId"]=tmpl.simpTmplParse(build.QueryModuleId,{TableName:table.TableName.toUpperCase()});
+				table["AddModuleId"]=tmpl.simpTmplParse(build.AddModuleId,{TableName:table.TableName.toUpperCase()}); 
+			})
+			var entityTmp=fs.readFileSync(build.Template).toString("utf-8"); 
+			fs.writeFile(build.OutPutFile,tmpl.funcTmplParse(entityTmp,tables),function(err){
+				if(err){
+					console.log(err)
+				}
+				console.log(build.Desc+" 生成成功！");
+			});
+		})(tables,buildConfig.BuildService)
 	})
 	
 }

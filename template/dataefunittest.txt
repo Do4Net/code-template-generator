@@ -1,0 +1,38 @@
+using HY.Common.Components;
+using HY.FinancialCooperation.Data.Entities;
+using HY.FinancialCooperation.Data.Repositorys;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace HY.FinancialCooperation.Data.EF.Test
+{
+    [TestClass]
+    public class <%=model.TableName%>UnitTest
+    {
+        [TestMethod]
+        public void Query()
+        {
+            var context = ObjectContainer.Current.Resolve<IFinancialCooperationRepositoryContext>();
+            var repository = context.GetRepository<<%=model.TableName%>>();
+            var models = repository.GetQuery().Take(10).ToList();
+            Console.WriteLine(models);
+        }
+        [TestMethod]
+        public void AddOrUpdate()
+        {
+            var context = ObjectContainer.Current.Resolve<IFinancialCooperationRepositoryContext>();
+            var repository = context.GetRepository<<%=model.TableName%>>();
+            repository.Add(new <%=model.TableName%>()
+            {
+        <% var count=model.Clumns.length;  model.Clumns&&model.Clumns.forEach(function(clumn,index){ %> <% if(clumn.AttributeName!="ID"){ if(count==(++index)) {%>
+                    <%= clumn.AttributeName %> = <%= clumn.AttributeTest %><% }else{ %>
+                    <%= clumn.AttributeName %> = <%= clumn.AttributeTest %>,<% } } %><% }); %> 
+            });
+            repository.UnitOfWork.Commit();
+        }
+    }
+}

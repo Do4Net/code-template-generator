@@ -1,0 +1,19 @@
+using HY.FinancialCooperation.Data.EF.DbContextConfiguration;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Data.Entity.ModelConfiguration;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace HY.FinancialCooperation.Data.EF.UnitOfWork
+{
+    class <%=model.TableName %>EntityTypeConfiguration : EntityConfigurationBase<HY.FinancialCooperation.Data.Entities.<%=model.TableName %>>
+    {
+        public <%=model.TableName %>EntityTypeConfiguration()
+        {
+            this.HasKey(c => c.ID).Property(p => p.ID).HasDatabaseGeneratedOption(DatabaseGeneratedOption.Identity);
+        }
+    }
+}

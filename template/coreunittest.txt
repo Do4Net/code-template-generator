@@ -1,0 +1,42 @@
+using System;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using HY.FinancialCooperation.Common;
+using HY.Common.WCF;
+using HY.FinancialCooperation.Common.FinancialCooperation.InputOutput;
+
+
+namespace HY.FinancialCooperation.Core.Test
+{
+    [TestClass]
+    public class <%=model.TableName%>UnitTest
+    {
+        [TestMethod]
+        public void AddOrUpdate()
+        {
+            var reply = new FinancialCooperationService().AddOrUpdate<%=model.TableName%>(
+                new AddOrUpdate<%=model.TableName%>Request()
+            {
+                SecurityCredential = SecurityCredential.DefaultCredential,
+                <%=model.TableName%> = new Common.FinancialCooperation.<%=model.TableName%>()
+                {
+                <% var count=model.Clumns.length;  model.Clumns&&model.Clumns.forEach(function(clumn,index){ %> <% if(clumn.AttributeName!="ID"){  if(count==(++index)) {%>
+                    <%= clumn.AttributeName %> = <%= clumn.AttributeTest %><% }else{ %>
+                    <%= clumn.AttributeName %> = <%= clumn.AttributeTest %>,<% } }%><% }); %> 
+                }
+            });
+
+            Console.WriteLine(reply);
+        }
+        [TestMethod]
+        public void Query()
+        { 
+            var reply = new FinancialCooperationService().<%=model.TableName%>Query(
+                new <%=model.TableName%>QueryRequest()
+                {
+                    SecurityCredential = SecurityCredential.DefaultCredential,
+                    ID = 1
+                }); 
+            Console.WriteLine(reply);
+        }
+    }
+}
