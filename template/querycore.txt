@@ -1,3 +1,4 @@
+using HY.FinancialCooperation.Common;
 using HY.FinancialCooperation.Common.FinancialCooperation;
 using HY.FinancialCooperation.Common.FinancialCooperation.InputOutput;
 using System;
@@ -19,7 +20,7 @@ namespace HY.FinancialCooperation.Core.FinancialCooperation
         {
             get
             {
-                return base.ModelId;
+                return FinancialCooperationConst.<%=model.ModuleId %>;
             }
         }
         protected override void BeforeHandle()
