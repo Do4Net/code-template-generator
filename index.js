@@ -20,7 +20,6 @@ const
 	"DEFAULTNULLdecimal" : "Nullable<decimal>"
 };
 
-
 var queryCondition=function(type,filed){
 	switch(type){
 		case "int":
@@ -35,6 +34,7 @@ var queryCondition=function(type,filed){
 		return `!string.IsNullOrWhiteSpace(request.${filed})`; 
 	}
 }
+
 var getUnitTestValue=function(type,filed){
 	if(filed==="IsValid"){
 		return '"T"';
@@ -120,43 +120,43 @@ function buildClass(tables,build,callback){
 	}) 
 }
 
+function getRemoteTableData(callback){
+	var pushList=[];
+	if(!datasourceConfig.TableNames||!datasourceConfig.TableNames.length){
+		callback([]); return;
+	}
+ 
+	lazylist(
+		datasourceConfig.TableNames.map(function(tableName){
+			return function(callback){
+				fetch(tmpl.simpTmplParse(datasourceConfig.RemoteUrl,{TableName:tableName}))
+				.then(function(response){
+					return response.json(); 
+				}).then(function(data){
+					callback({TableName:tableName,Clumns:data});
+				})
+			};
+		}),
+		function(){ 
+			var tables=Array.prototype.map.call(arguments,function(table){
+				table.Clumns.forEach(function(clumn){
+					var type=dbType[`${(clumn.IsNull=="NO"?"NOT":"DEFAULT")}NULL${clumn.AttributeType}`];
+					clumn.AttributeType=type;
+					clumn["AttributeCondition"]=clumn.AttributeName=="CreateUser"?`request.${clumn.AttributeName}>0`:queryCondition(type,clumn.AttributeName);
+				}) 
+				return table;
+			})
+		callback(tables);
+	})
+}
  
 function build(){
 	lazylist([function(callback){
 		if(datasourceConfig.EnableRemoteSource){
-			var pushList=[];
-			if(datasourceConfig.TableNames&&datasourceConfig.TableNames.length){
-				datasourceConfig.TableNames.forEach(function(tableName){
-					pushList.push(function(callback){
-						fetch(tmpl.simpTmplParse(datasourceConfig.RemoteUrl,{TableName:tableName}))
-						.then(function(response){
-							return response.json(); 
-						}).then(function(data){
-							callback({TableName:tableName,Clumns:data});
-						})
-					}) 
-				})
-
-				lazylist(pushList,function(){ 
-					var tables=Array.prototype.map.call(arguments,function(table){
-						table.Clumns.forEach(function(clumn){
-							var type=dbType[`${(clumn.IsNull=="NO"?"NOT":"DEFAULT")}NULL${clumn.AttributeType}`];
-							clumn.AttributeType=type;
-							clumn["AttributeCondition"]=clumn.AttributeName=="CreateUser"?`request.${clumn.AttributeName}>0`:queryCondition(type,clumn.AttributeName);
-						}) 
-						return table;
-					})
-					callback(tables);
-				})
-			}else{
-				callback([]);
-			} 
+			getRemoteTableData(callback);
 		}else{
-			parseTableData(inputDir,function(tables){ 
-				callback(tables);
-			})
-		}
-		
+			parseTableData(inputDir,callback)
+		} 
 	}],function(tables){
 		if(!tables||tables.length==0){
 			console.log("解析表结构失败！");
