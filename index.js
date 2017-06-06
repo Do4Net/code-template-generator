@@ -3,6 +3,7 @@ const
   path = require("path"),
   fetch = require('node-fetch'),
   tmpl=require("./lib/tmpl.js"),
+  iconv = require('iconv-lite'),
   queue=require("./lib/queue.js"), 
   lazylist=require("./lib/lazylist.js"),
   buildConfig=require("./config/build.js"),
@@ -20,18 +21,18 @@ const
 	"DEFAULTNULLdecimal" : "Nullable<decimal>"
 };
 
-var queryCondition=function(type,filed){
+var queryCondition=function(type,filed,isquery){
 	switch(type){
 		case "int":
-		return `request.${filed}>0`; 
+		return isquery?`request.${filed}>0`:`dto.${filed}<0`; 
 		case "Nullable<int>": 
-		return `request.${filed}.GetValueOrDefault()>0`; 
+		return isquery?`request.${filed}.GetValueOrDefault()>0`:`dto.${filed}.GetValueOrDefault()<=0`; 
 		case "Nullable<DateTime>": 
-		return `request.${filed}.HasValue`;
+		return isquery?`request.${filed}.HasValue`:`dto.${filed}==null`;
 		case "Nullable<decimal>": 
-		return `request.${filed}.GetValueOrDefault()>0`; 
+		return isquery?`request.${filed}.GetValueOrDefault()>0`:`dto.${filed}.GetValueOrDefault()<=0`; 
 		default: 
-		return `!string.IsNullOrWhiteSpace(request.${filed})`; 
+		return isquery?`!string.IsNullOrWhiteSpace(request.${filed})`:`string.IsNullOrWhiteSpace(dto.${filed})`; 
 	}
 }
 
@@ -78,7 +79,8 @@ function parseTableData(dir,callback){
 			  		console.log(err);
 			  	} 
 				entity["Clumns"]=[];  
-			    var table=data.toString('utf8').replace("AUTO_INCREMENT","").replace("COMMENT","");//.split("\r\n");
+
+			    var table=iconv.decode(new Buffer(data), 'gb2312');//.split("\r\n");
 			  	
 			  	table.replace(clumReg,function(all,clumnName,clumnType1,clumnType2,clumnType3,clumnDesc){
 		  			var type=dbType[clumnType2+clumnType3+clumnType1];
@@ -86,7 +88,7 @@ function parseTableData(dir,callback){
 		  				AttributeDesc:clumnDesc,
 		  				AttributeType:type,
 		  				AttributeName:clumnName,
-		  				AttributeCondition:queryCondition(type,clumnName)
+		  				AttributeCondition:queryCondition(type,clumnName,true)
 		  			});
 			  	});
 			  	tables.push(entity); 
@@ -111,7 +113,7 @@ function buildClass(tables,build,callback){
 			callback(table);
 		} 
 		classInner=tmpl.funcTmplParse(entityTmp,table);
-		fs.writeFile(tmpl.simpTmplParse(build.OutPutFile,table),classInner,function(err){
+		fs.writeFile(tmpl.simpTmplParse(build.OutPutFile,table),iconv.encode(classInner, 'gbk'),function(err){
 			if(err){
 				console.log(err)
 			}
@@ -142,7 +144,8 @@ function getRemoteTableData(callback){
 				table.Clumns.forEach(function(clumn){
 					var type=dbType[`${(clumn.IsNull=="NO"?"NOT":"DEFAULT")}NULL${clumn.AttributeType}`];
 					clumn.AttributeType=type;
-					clumn["AttributeCondition"]=clumn.AttributeName=="CreateUser"?`request.${clumn.AttributeName}>0`:queryCondition(type,clumn.AttributeName);
+					clumn["AddOrUpdateCondition"]=queryCondition(type,clumn.AttributeName,false);
+					clumn["AttributeCondition"]=clumn.AttributeName=="CreateUser"?`request.${clumn.AttributeName}>0`:queryCondition(type,clumn.AttributeName,true);
 				}) 
 				return table;
 			})

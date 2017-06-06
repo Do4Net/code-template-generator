@@ -1,6 +1,7 @@
 using HY.FinancialCooperation.Common;
 using HY.FinancialCooperation.Common.FinancialCooperation;
 using HY.FinancialCooperation.Common.FinancialCooperation.InputOutput;
+using HY.MetaData;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,6 +12,7 @@ namespace HY.FinancialCooperation.Core.FinancialCooperation
 {
     class AddOrUpdate<%=model.TableName %> : FinancialCooperationServiceHandlerBase<AddOrUpdate<%=model.TableName %>Request, AddOrUpdate<%=model.TableName %>Reply>
     {
+        <%=model.TableName %> dto = null;
         HY.FinancialCooperation.Data.Entities.<%=model.TableName %> data = null;
         IQueryable<HY.FinancialCooperation.Data.Entities.<%=model.TableName %>> query = null;
         HY.Common.Seedwork.IRepository<HY.FinancialCooperation.Data.Entities.<%=model.TableName %>> repository = null;
@@ -28,7 +30,39 @@ namespace HY.FinancialCooperation.Core.FinancialCooperation
         }
         protected override void BeforeHandle()
         {
-            base.BeforeHandle();
+            base.BeforeHandle(); 
+            dto = request.<%=model.TableName %>;
+
+            if (request.ReSetIsvalid)
+            {
+                if ((request.IsValid != BusinessBase.BusinessConst.ISVALID_FALSE || request.IsValid != BusinessBase.BusinessConst.ISVALID_TRUR))
+                {
+                    reply.FillCodeDesc(ReturnCodeEnum.InvalidArgument, "数据状态：IsValid", "无效");
+                    return;
+                }
+                return;
+            }
+            if (dto == null)
+            {
+                reply.FillCodeDesc(ReturnCodeEnum.InvalidArgument, "数据契约对象", "不能为空！");
+                return;
+            }
+            if (dto.ID > 0)
+            {
+                data = query.FirstOrDefault(t => t.ID == dto.ID);
+                if (data == null)
+                {
+                    reply.FillCodeDesc(ReturnCodeEnum.NotExists, "当前数据库对象");
+                    return;
+                }
+            }
+        <% model.Clumns&&model.Clumns.forEach(function(clumn){ if(["CreateUser","CreateTime","IsValid","ModifyTime","ModifyUser","ID"].indexOf(clumn.AttributeName)==-1 && clumn.IsNull=="NO") {%>
+            if (<%=clumn.AddOrUpdateCondition %>)
+            {
+                reply.FillCodeDesc(ReturnCodeEnum.InvalidArgument,"字段：<%= clumn.AttributeName %>", "不能为：" + dto.<%= clumn.AttributeName %>);
+                return;
+            }          
+         <% } }); %> 
         }
         protected override void RealRequestInvoke()
         {
@@ -48,9 +82,10 @@ namespace HY.FinancialCooperation.Core.FinancialCooperation
         {
             if (data == null)
             {
-                data = EntityMappers.EntityMapper.Map<<%=model.TableName %>, HY.FinancialCooperation.Data.Entities.<%=model.TableName %>>(request.<%=model.TableName %>);
-            <% model.Clumns&&model.Clumns.forEach(function(clumn){ %> <% if(["CreateUser","CreateTime","IsValid","ModifyTime","ModifyUser"].indexOf(clumn.AttributeName)==-1) {%>
-                data.<%= clumn.AttributeName %> = request.<%=model.TableName %>.<%= clumn.AttributeName %>;  <%}%> <% }); %>  
+                data = EntityMappers.EntityMapper.Map<<%= model.TableName %>, HY.FinancialCooperation.Data.Entities.<%= model.TableName %>>(request.<%= model.TableName %>);
+                <% model.Clumns&&model.Clumns.forEach(function(clumn){ if(["CreateUser","CreateTime","IsValid","ModifyTime","ModifyUser","ID"].indexOf(clumn.AttributeName)==-1) {%>  
+                data.<%= clumn.AttributeName %> = request.<%=model.TableName %>.<%= clumn.AttributeName %>;    <% } }); %> 
+
                 data.CreateTime = DateTime.Now;
                 data.CreateUser = request.CustomerId; 
                 data.IsValid = HY.BusinessBase.BusinessConst.ISVALID_TRUR; 
@@ -58,7 +93,9 @@ namespace HY.FinancialCooperation.Core.FinancialCooperation
             }
             else
             {
-                
+                <% model.Clumns&&model.Clumns.forEach(function(clumn){ if(["CreateUser","CreateTime","IsValid","ModifyTime","ModifyUser","ID"].indexOf(clumn.AttributeName)==-1) {%>  
+                data.<%= clumn.AttributeName %> = request.<%=model.TableName %>.<%= clumn.AttributeName %>;    <% } }); %> 
+
                 data.ModifyTime = DateTime.Now;
                 data.ModifyUser = request.CustomerId;
             }
