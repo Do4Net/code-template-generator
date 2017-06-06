@@ -10,12 +10,12 @@ namespace HY.FinancialCooperation.Common.FinancialCooperation
     [DataContract]
     public class <%=model.TableName %> : DataContractBase
     {
-   		<% model.Clumns&&model.Clumns.forEach(function(clumn){ %> 
+   		<% model.Clumns&&model.Clumns.forEach(function(clumn){ if(["CreateUser","CreateTime","IsValid","ModifyTime","ModifyUser"].indexOf(clumn.AttributeName)==-1) {%> 
    		 /// <summary>
         /// 	<%= clumn.AttributeDesc %>
         /// </summary>
         [DataMember]
         public <%= clumn.AttributeType %> <%= clumn.AttributeName %> { get; set; } 
-   		<% }); %> 
+   		<%} }); %> 
     }
 }

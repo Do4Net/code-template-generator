@@ -49,7 +49,7 @@ namespace HY.FinancialCooperation.Core.FinancialCooperation
             if (data == null)
             {
                 data = EntityMappers.EntityMapper.Map<<%=model.TableName %>, HY.FinancialCooperation.Data.Entities.<%=model.TableName %>>(request.<%=model.TableName %>);
-            <% model.Clumns&&model.Clumns.forEach(function(clumn){ %> <% if(["CreateTime","CreateTime","IsValid","ModifyTime","ModifyUser"].indexOf(clumn.AttributeName)==-1) {%>
+            <% model.Clumns&&model.Clumns.forEach(function(clumn){ %> <% if(["CreateUser","CreateTime","IsValid","ModifyTime","ModifyUser"].indexOf(clumn.AttributeName)==-1) {%>
                 data.<%= clumn.AttributeName %> = request.<%=model.TableName %>.<%= clumn.AttributeName %>;  <%}%> <% }); %>  
                 data.CreateTime = DateTime.Now;
                 data.CreateUser = request.CustomerId; 

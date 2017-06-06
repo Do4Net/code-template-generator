@@ -12,13 +12,13 @@ namespace HY.FinancialCooperation.Common.FinancialCooperation.InputOutput
     [Serializable]
     public class <%=model.TableName %>QueryRequest : FinancialCooperationRequestBase
     {
-        <% model.Clumns&&model.Clumns.forEach(function(clumn){ %> 
+        <% model.Clumns&&model.Clumns.forEach(function(clumn){ if(["CreateUser"].indexOf(clumn.AttributeName)==-1) {%> 
          /// <summary>
         ///     <%= clumn.AttributeDesc %>
         /// </summary>
         [DataMember]
         public <%= clumn.AttributeType %> <%= clumn.AttributeName %> { get; set; } 
-        <% }); %> 
+        <% } }); %> 
 
         [DataMember]
         public PagingInfo Paging { get; set; }

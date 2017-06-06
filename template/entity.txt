@@ -8,11 +8,11 @@ namespace HY.FinancialCooperation.Data.Entities
 {
     public partial class <%= model.TableName %> : EntityBase   
     {
-   		<% model.Clumns&&model.Clumns.forEach(function(clumn){ %> 
+   		<% model.Clumns&&model.Clumns.forEach(function(clumn){ if(["CreateUser","CreateTime","IsValid","ModifyTime","ModifyUser"].indexOf(clumn.AttributeName)==-1) {%> 
    		 /// <summary>
         /// 	<%= clumn.AttributeDesc %>
         /// </summary>
         public <%= clumn.AttributeType %> <%= clumn.AttributeName %> { get; set; } 
-   		<% }); %>
+   		<% } }); %>
     }
 }

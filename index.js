@@ -15,7 +15,7 @@ const
 	"DEFAULTNULLint"	 : "Nullable<int>",
 	"DEFAULTNULLbigint"	 : "Nullable<int>",
 	"DEFAULTNULLvarchar" : "string",
-	"DEFAULTNULLtext" : "string",
+	"DEFAULTNULLtext" 	 : "string",
 	"DEFAULTNULLdatetime": "Nullable<DateTime>",
 	"DEFAULTNULLdecimal" : "Nullable<decimal>"
 };
@@ -142,7 +142,7 @@ function build(){
 						table.Clumns.forEach(function(clumn){
 							var type=dbType[`${(clumn.IsNull=="NO"?"NOT":"DEFAULT")}NULL${clumn.AttributeType}`];
 							clumn.AttributeType=type;
-							clumn["AttributeCondition"]=queryCondition(type,clumn.AttributeName);
+							clumn["AttributeCondition"]=clumn.AttributeName=="CreateUser"?`request.${clumn.AttributeName}>0`:queryCondition(type,clumn.AttributeName);
 						}) 
 						return table;
 					})

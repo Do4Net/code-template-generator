@@ -26,12 +26,12 @@
 		<% model&&model.forEach(function(table){%>
         public <%= table.TableName %>QueryReply <%= table.TableName %>Query(<%= table.TableName %>QueryRequest request)
         {
-            return new <%= table.TableName %>Query().HandleRequest(request);
+            return  return HY.Common.Components.ObjectContainer.Current.Resolve<<%= table.TableName %>Query>().HandleRequest(request);
         }
 
         public AddOrUpdate<%= table.TableName %>Reply AddOrUpdate<%= table.TableName %>(AddOrUpdate<%= table.TableName %>Request request)
         {
-            return new AddOrUpdate<%= table.TableName %>().HandleRequest(request);
+            return  return HY.Common.Components.ObjectContainer.Current.Resolve<AddOrUpdate<%= table.TableName %>>().HandleRequest(request);
         }
         <% }); %>
 
