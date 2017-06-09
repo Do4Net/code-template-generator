@@ -24,7 +24,7 @@ const
 var queryCondition=function(type,filed,isquery){
 	switch(type){
 		case "int":
-		return isquery?`request.${filed}>0`:`dto.${filed}<0`; 
+		return isquery?`request.${filed}>0`:`dto.${filed}<=0`; 
 		case "Nullable<int>": 
 		return isquery?`request.${filed}.GetValueOrDefault()>0`:`dto.${filed}.GetValueOrDefault()<=0`; 
 		case "Nullable<DateTime>": 
@@ -153,6 +153,52 @@ function getRemoteTableData(callback){
 	})
 }
  
+ function startBuild(tables){
+ 	with(buildConfig){
+ 	//console.log(JSON.stringify(tables))
+		//生成ORM实体类
+		BuildEntityClass.Enable&&buildClass(tables,BuildEntityClass);
+		//生成数据契约
+		BuildDataContract.Enable&&buildClass(tables,BuildDataContract); 
+		//生成查询请求响应契约实体
+		BuildQueryReqResContract.Enable&&buildClass(tables,BuildQueryReqResContract);
+		//生成新增修改请求响应契约实体
+		BuildAddOrUpdateReqResContract.Enable&&buildClass(tables,BuildAddOrUpdateReqResContract);
+		//生成查询core
+		BuildQueryCore.Enable&&buildClass(tables,BuildQueryCore);
+		//生成新增修改core
+		BuildAddOrUpdateCore.Enable&&buildClass(tables,BuildAddOrUpdateCore);
+		//生成数据库实体映射文件
+		BuildEntityTypeConfiguration.Enable&&buildClass(tables,BuildEntityTypeConfiguration);
+		//生成EF层测试单元
+		BuildDataEFUnitTest.Enable&&buildClass(tables,BuildDataEFUnitTest,function(table){
+			table.Clumns.forEach(function(clumn){
+				clumn["AttributeTest"]=getUnitTestValue(clumn.AttributeType,clumn.AttributeName); 
+			}) 	 
+		});
+		//生成core层测试单元
+		BuildCoreUnitTest.Enable&&buildClass(tables,BuildCoreUnitTest,function(table){
+			table.Clumns.forEach(function(clumn){
+				clumn["AttributeTest"]=getUnitTestValue(clumn.AttributeType,clumn.AttributeName);
+			}) 	 
+		});
+
+		//生成服务契约及其实现
+		BuildService.Enable&&(function(tables,build){
+			tables.forEach(function(table){
+				table["QueryModuleId"]=tmpl.simpTmplParse(build.QueryModuleId,{TableName:table.TableName.toUpperCase()});
+				table["AddModuleId"]=tmpl.simpTmplParse(build.AddModuleId,{TableName:table.TableName.toUpperCase()}); 
+			})
+			var entityTmp=fs.readFileSync(build.Template).toString("utf-8"); 
+			fs.writeFile(build.OutPutFile,tmpl.funcTmplParse(entityTmp,tables),function(err){
+				if(err){
+					console.log(err)
+				}
+				console.log(build.Desc+" 生成成功！");
+			});
+		})(tables,BuildService);
+	}
+ }
 function build(){
 	lazylist([function(callback){
 		if(datasourceConfig.EnableRemoteSource){
@@ -165,48 +211,7 @@ function build(){
 			console.log("解析表结构失败！");
 			return;
 		}
-		//console.log(JSON.stringify(tables))
-		//生成ORM实体类
-		buildConfig.BuildEntityClass.Enable&&buildClass(tables,buildConfig.BuildEntityClass);
-		//生成数据契约
-		buildConfig.BuildDataContract.Enable&&buildClass(tables,buildConfig.BuildDataContract); 
-		//生成查询请求响应契约实体
-		buildConfig.BuildQueryReqResContract.Enable&&buildClass(tables,buildConfig.BuildQueryReqResContract);
-		//生成新增修改请求响应契约实体
-		buildConfig.BuildAddOrUpdateReqResContract.Enable&&buildClass(tables,buildConfig.BuildAddOrUpdateReqResContract);
-		//生成查询core
-		buildConfig.BuildQueryCore.Enable&&buildClass(tables,buildConfig.BuildQueryCore);
-		//生成新增修改core
-		buildConfig.BuildAddOrUpdateCore.Enable&&buildClass(tables,buildConfig.BuildAddOrUpdateCore);
-		//生成数据库实体映射文件
-		buildConfig.BuildEntityTypeConfiguration.Enable&&buildClass(tables,buildConfig.BuildEntityTypeConfiguration);
-		//生成EF层测试单元
-		buildConfig.BuildDataEFUnitTest.Enable&&buildClass(tables,buildConfig.BuildDataEFUnitTest,function(table){
-			table.Clumns.forEach(function(clumn){
-				clumn["AttributeTest"]=getUnitTestValue(clumn.AttributeType,clumn.AttributeName); 
-			}) 	 
-		});
-		//生成core层测试单元
-		buildConfig.BuildCoreUnitTest.Enable&&buildClass(tables,buildConfig.BuildCoreUnitTest,function(table){
-			table.Clumns.forEach(function(clumn){
-				clumn["AttributeTest"]=getUnitTestValue(clumn.AttributeType,clumn.AttributeName);
-			}) 	 
-		});
-
-		//生成服务契约及其实现
-		buildConfig.BuildService.Enable&&(function(tables,build){
-			tables.forEach(function(table){
-				table["QueryModuleId"]=tmpl.simpTmplParse(build.QueryModuleId,{TableName:table.TableName.toUpperCase()});
-				table["AddModuleId"]=tmpl.simpTmplParse(build.AddModuleId,{TableName:table.TableName.toUpperCase()}); 
-			})
-			var entityTmp=fs.readFileSync(build.Template).toString("utf-8"); 
-			fs.writeFile(build.OutPutFile,tmpl.funcTmplParse(entityTmp,tables),function(err){
-				if(err){
-					console.log(err)
-				}
-				console.log(build.Desc+" 生成成功！");
-			});
-		})(tables,buildConfig.BuildService)
+		startBuild(tables); 
 	})
 	
 }
