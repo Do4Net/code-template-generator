@@ -1,0 +1,7 @@
+		#region
+		[OperationContract]
+		ServiceResult<List<<%= model.TableName %>>> <%= model.TableName %>PageListQuery(<%= model.TableName %> model, PagingInfo pager = null);
+		[OperationContract]
+		ServiceResult <%= model.TableName %>AddOrUpdate(<%= model.TableName %> model);
+		#endregion
+		// <  >

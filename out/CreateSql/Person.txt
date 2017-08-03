@@ -1,0 +1,94 @@
+CREATE TABLE [dbo].[Person] (
+[Id] int NOT NULL IDENTITY(1,1) ,
+[FK_MemberId] int NOT NULL , 
+[Name]	varchar(50) null ,
+[Sex]	tinyint null,
+[Age]	tinyint null,
+ 
+[HeadquarterId] int NULL ,
+[StoreId] int NULL ,
+[CreateUser] int NULL ,
+[LastUpdateUser] int NULL ,
+[IsDelete] bit NULL ,
+[CreateTime] datetime NULL ,
+[LastUpdateTime] datetime NULL ,
+CONSTRAINT [PK_Person] PRIMARY KEY ([Id])
+)
+ON [PRIMARY]
+GO
+
+IF ((SELECT COUNT(*) from fn_listextendedproperty('MS_Description', 
+'SCHEMA', N'dbo', 
+'TABLE', N'AgingCommittee', 
+'COLUMN', N'Id')) > 0) 
+EXEC sp_updateextendedproperty @name = N'MS_Description', @value = N'主键'
+, @level0type = 'SCHEMA', @level0name = N'dbo'
+, @level1type = 'TABLE', @level1name = N'AgingCommittee'
+, @level2type = 'COLUMN', @level2name = N'Id'
+ELSE
+EXEC sp_addextendedproperty @name = N'MS_Description', @value = N'主键'
+, @level0type = 'SCHEMA', @level0name = N'dbo'
+, @level1type = 'TABLE', @level1name = N'AgingCommittee'
+, @level2type = 'COLUMN', @level2name = N'Id'
+GO
+
+IF ((SELECT COUNT(*) from fn_listextendedproperty('MS_Description', 
+'SCHEMA', N'dbo', 
+'TABLE', N'AgingCommittee', 
+'COLUMN', N'FK_MemberId')) > 0) 
+EXEC sp_updateextendedproperty @name = N'MS_Description', @value = N'居民外键'
+, @level0type = 'SCHEMA', @level0name = N'dbo'
+, @level1type = 'TABLE', @level1name = N'AgingCommittee'
+, @level2type = 'COLUMN', @level2name = N'FK_MemberId'
+ELSE
+EXEC sp_addextendedproperty @name = N'MS_Description', @value = N'居民外键'
+, @level0type = 'SCHEMA', @level0name = N'dbo'
+, @level1type = 'TABLE', @level1name = N'AgingCommittee'
+, @level2type = 'COLUMN', @level2name = N'FK_MemberId'
+GO
+
+ 
+IF ((SELECT COUNT(*) from fn_listextendedproperty('MS_Description', 
+'SCHEMA', N'dbo', 
+'TABLE', N'Person', 
+'COLUMN', N'Name')) > 0) 
+EXEC sp_updateextendedproperty @name = N'MS_Description', @value = N'姓名'
+, @level0type = 'SCHEMA', @level0name = N'dbo'
+, @level1type = 'TABLE', @level1name = N'Person'
+, @level2type = 'COLUMN', @level2name = N'Name'
+ELSE
+EXEC sp_addextendedproperty @name = N'MS_Description', @value = N'姓名'
+, @level0type = 'SCHEMA', @level0name = N'dbo'
+, @level1type = 'TABLE', @level1name = N'Person'
+, @level2type = 'COLUMN', @level2name = N'Name'
+GO 
+ 
+IF ((SELECT COUNT(*) from fn_listextendedproperty('MS_Description', 
+'SCHEMA', N'dbo', 
+'TABLE', N'Person', 
+'COLUMN', N'Sex')) > 0) 
+EXEC sp_updateextendedproperty @name = N'MS_Description', @value = N'性别：1 男 2女'
+, @level0type = 'SCHEMA', @level0name = N'dbo'
+, @level1type = 'TABLE', @level1name = N'Person'
+, @level2type = 'COLUMN', @level2name = N'Sex'
+ELSE
+EXEC sp_addextendedproperty @name = N'MS_Description', @value = N'性别：1 男 2女'
+, @level0type = 'SCHEMA', @level0name = N'dbo'
+, @level1type = 'TABLE', @level1name = N'Person'
+, @level2type = 'COLUMN', @level2name = N'Sex'
+GO 
+ 
+IF ((SELECT COUNT(*) from fn_listextendedproperty('MS_Description', 
+'SCHEMA', N'dbo', 
+'TABLE', N'Person', 
+'COLUMN', N'Age')) > 0) 
+EXEC sp_updateextendedproperty @name = N'MS_Description', @value = N'年龄'
+, @level0type = 'SCHEMA', @level0name = N'dbo'
+, @level1type = 'TABLE', @level1name = N'Person'
+, @level2type = 'COLUMN', @level2name = N'Age'
+ELSE
+EXEC sp_addextendedproperty @name = N'MS_Description', @value = N'年龄'
+, @level0type = 'SCHEMA', @level0name = N'dbo'
+, @level1type = 'TABLE', @level1name = N'Person'
+, @level2type = 'COLUMN', @level2name = N'Age'
+GO 

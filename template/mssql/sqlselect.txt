@@ -1,0 +1,3 @@
+    SELECT
+	<% var count=model.Clumns.length; model.Clumns&&model.Clumns.forEach(function(clumn,index){ %>  extend.[<%= clumn.AttributeName %>]<% if(count!=(++index)){%>, <% } %>
+	<% }); %>  FROM <%= model.TableName %> AS extend  WITH(NOLOCK)

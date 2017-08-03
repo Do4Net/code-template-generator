@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<statements>
+  <statement id="CustomerDB_<%= model.TableName %>_PageQuery"  primarykey="Id" cached="false" expired="0" description="Query">
+    WITH  temp
+    AS ( SELECT
+	<%  model.Clumns&&model.Clumns.forEach(function(clumn){ %>  extend.[<%= clumn.AttributeName %>],
+	<% }); %>  ROW_NUMBER() OVER ( ORDER BY extend.Id DESC ) AS ROW
+    FROM <%= model.TableName %> AS extend  WITH(NOLOCK)
+    <Dynamic Prepend="where">
+		  IsDelete=0<% model.Clumns&&model.Clumns.forEach(function(clumn){ if(["LastUpdateTime","LastUpdateUser","IsDelete","StoreId","HeadquarterId","CreateUser","CreateTime"].indexOf(clumn.AttributeName)==-1) {%> 
+      <%= clumn.AttributeCondition %><% }}); %>
+    </Dynamic> 
+    )
+    SELECT  *
+    FROM    temp
+    WHERE ROW BETWEEN (@PageIndex - 1) * @PageSize+1 AND @PageIndex * @PageSize
+  </statement>
+  <statement id="CustomerDB_<%= model.TableName %>_Query"  primarykey="Id" cached="false" expired="0" description="Query">
+    SELECT
+	<% var count=model.Clumns.length; model.Clumns&&model.Clumns.forEach(function(clumn,index){ %>  extend.[<%= clumn.AttributeName %>]<% if(count!=(++index)){%>, <% } %>
+	<% }); %>  FROM <%= model.TableName %> AS extend  WITH(NOLOCK)
+    <Dynamic Prepend="where">
+		  IsDelete=0<% model.Clumns&&model.Clumns.forEach(function(clumn){ if(["LastUpdateTime","LastUpdateUser","IsDelete","StoreId","HeadquarterId","CreateUser","CreateTime"].indexOf(clumn.AttributeName)==-1) {%> 
+      <%= clumn.AttributeCondition %><% }}); %>
+	</Dynamic> 
+  </statement>
+  <statement id="CustomerDB_<%= model.TableName %>_Add"  primarykey="Id" cached="false" expired="0" description="Add">
+    INSERT INTO <%= model.TableName %> (
+ <% var count=model.Clumns.length; model.Clumns&&model.Clumns.forEach(function(clumn,index){if(["Id"].indexOf(clumn.AttributeName)==-1) { %>    <%= clumn.AttributeName %> <% if(count!=(++index)){%>,   
+ <% } }  }); %>
+    ) VALUES (
+ <% var count=model.Clumns.length; model.Clumns&&model.Clumns.forEach(function(clumn,index){  if(["Id"].indexOf(clumn.AttributeName)==-1) {%>    @<%= clumn.AttributeName %><% if(count!=(++index)){%>,   	
+ <% }} }); %>  )
+  </statement>
+  <statement id="CustomerDB_<%= model.TableName %>_Update"  primarykey="Id" cached="false" expired="0" description="Update">
+    UPDATE <%= model.TableName %> SET 
+<% var count=model.Clumns.length; model.Clumns&&model.Clumns.forEach(function(clumn,index){ if(["Id"].indexOf(clumn.AttributeName)==-1) { %>    <%= clumn.AttributeName %> = @<%= clumn.AttributeName %><% if(count!=(++index)){%>,   	
+<%} } }); %>
+	WHERE Id=@Id 
+  </statement>
+  <statement id="CustomerDB_<%= model.TableName %>_Delete"  primarykey="Id" cached="false" expired="0" description="Delete">
+   UPDATE <%= model.TableName %> SET  IsDelete=1, LastUpdateUser=@LastUpdateUser, LastUpdateTime=getdate() WHERE Id=@Id and IsDelete=0
+  </statement>
+</statements>

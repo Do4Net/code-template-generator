@@ -1,0 +1,23 @@
+using System;
+using System.Collections.Generic; 
+using System.Linq;
+using System.Runtime.Serialization;
+using System.Text;
+using System.Threading.Tasks;
+using System.Xml.Serialization;
+
+namespace EP.Community.Entity
+{ 
+    [DataContract]
+    [Serializable] 
+    public partial class <%= model.TableName %>  : BaseEntity
+    {
+        <% model.Clumns&&model.Clumns.forEach(function(clumn){ if(["LastUpdateTime","IsDelete","LastUpdateUser","StoreId","HeadquarterId","CreateUser","CreateTime"].indexOf(clumn.AttributeName)==-1) {%> 
+         /// <summary>
+        ///     <%= clumn.AttributeDesc %>
+        /// </summary>
+        [DataMember]
+        public <%= clumn.AttributeType %> <%= clumn.AttributeName %> { get; set; } 
+        <% } }); %>
+    } 
+}

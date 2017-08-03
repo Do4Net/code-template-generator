@@ -1,0 +1,66 @@
+
+CREATE TABLE [dbo].[<%= model.TableName %>] (
+[Id] int NOT NULL IDENTITY(1,1) ,
+[FK_MemberId] int NOT NULL , 
+<% model.Clumns&&model.Clumns.forEach(function(clumn){ %>[<%= clumn.AttributeName %>]	<%= clumn.Condition %>,
+<% }); %> 
+[HeadquarterId] int NULL ,
+[StoreId] int NULL ,
+[CreateUser] int NULL ,
+[LastUpdateUser] int NULL ,
+[IsDelete] bit NULL ,
+[CreateTime] datetime NULL ,
+[LastUpdateTime] datetime NULL ,
+CONSTRAINT [PK_<%= model.TableName %>] PRIMARY KEY ([Id])
+)
+ON [PRIMARY]
+GO
+
+IF ((SELECT COUNT(*) from fn_listextendedproperty('MS_Description', 
+'SCHEMA', N'dbo', 
+'TABLE', N'AgingCommittee', 
+'COLUMN', N'Id')) > 0) 
+EXEC sp_updateextendedproperty @name = N'MS_Description', @value = N'主键'
+, @level0type = 'SCHEMA', @level0name = N'dbo'
+, @level1type = 'TABLE', @level1name = N'AgingCommittee'
+, @level2type = 'COLUMN', @level2name = N'Id'
+ELSE
+EXEC sp_addextendedproperty @name = N'MS_Description', @value = N'主键'
+, @level0type = 'SCHEMA', @level0name = N'dbo'
+, @level1type = 'TABLE', @level1name = N'AgingCommittee'
+, @level2type = 'COLUMN', @level2name = N'Id'
+GO
+
+IF ((SELECT COUNT(*) from fn_listextendedproperty('MS_Description', 
+'SCHEMA', N'dbo', 
+'TABLE', N'AgingCommittee', 
+'COLUMN', N'FK_MemberId')) > 0) 
+EXEC sp_updateextendedproperty @name = N'MS_Description', @value = N'居民外键'
+, @level0type = 'SCHEMA', @level0name = N'dbo'
+, @level1type = 'TABLE', @level1name = N'AgingCommittee'
+, @level2type = 'COLUMN', @level2name = N'FK_MemberId'
+ELSE
+EXEC sp_addextendedproperty @name = N'MS_Description', @value = N'居民外键'
+, @level0type = 'SCHEMA', @level0name = N'dbo'
+, @level1type = 'TABLE', @level1name = N'AgingCommittee'
+, @level2type = 'COLUMN', @level2name = N'FK_MemberId'
+GO
+
+<% model.Clumns&&model.Clumns.forEach(function(clumn){ %> 
+IF ((SELECT COUNT(*) from fn_listextendedproperty('MS_Description', 
+'SCHEMA', N'dbo', 
+'TABLE', N'<%= model.TableName %>', 
+'COLUMN', N'<%= clumn.AttributeName %>')) > 0) 
+EXEC sp_updateextendedproperty @name = N'MS_Description', @value = N'<%= clumn.Desc %>'
+, @level0type = 'SCHEMA', @level0name = N'dbo'
+, @level1type = 'TABLE', @level1name = N'<%= model.TableName %>'
+, @level2type = 'COLUMN', @level2name = N'<%= clumn.AttributeName %>'
+ELSE
+EXEC sp_addextendedproperty @name = N'MS_Description', @value = N'<%= clumn.Desc %>'
+, @level0type = 'SCHEMA', @level0name = N'dbo'
+, @level1type = 'TABLE', @level1name = N'<%= model.TableName %>'
+, @level2type = 'COLUMN', @level2name = N'<%= clumn.AttributeName %>'
+GO 
+<% }); %> 
+
+

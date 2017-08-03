@@ -1,0 +1,32 @@
+------------------------------------ICustomerDBService 服务契约-------------------------------
+		#region <%= model.TableName %>
+		[OperationContract]
+		ServiceResult<List<<%= model.TableName %>>> <%= model.TableName %>PageListQuery(<%= model.TableName %> model, PagingInfo pager = null);
+		[OperationContract]
+		ServiceResult <%= model.TableName %>AddOrUpdate(<%= model.TableName %> model);
+		[OperationContract]
+		ServiceResult <%= model.TableName %>Delete(int id, string userId);
+		#endregion 
+------------------------------------ICustomerDBService 服务契约-------------------------------
+
+
+
+------------------------------------CustomerDBService 服务实现-------------------------------
+ 
+		#region <%= model.TableName %>
+		public ServiceResult<List<<%= model.TableName %>>> <%= model.TableName %>PageListQuery(<%= model.TableName %> model, PagingInfo pager = null)
+		{
+			return	 AutofacObjectContainer.Container.Resolve<I<%= model.TableName %>Business>().PageListQuery(model,pager);
+		}
+
+		public ServiceResult <%= model.TableName %>AddOrUpdate(<%= model.TableName %> model)
+		{
+			return AutofacObjectContainer.Container.Resolve<I<%= model.TableName %>Business>().AddOrUpdate(model);
+		}
+
+		public ServiceResult <%= model.TableName %>Delete(int id, string userId)
+		{
+			return AutofacObjectContainer.Container.Resolve<I<%= model.TableName %>Business>().Delete(id,userId);
+		}
+		#endregion  
+------------------------------------CustomerDBService 服务实现-------------------------------

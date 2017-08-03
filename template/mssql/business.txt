@@ -1,0 +1,128 @@
+using EP.Community.Entity;
+using EP.Community.Service;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace EP.Community.Business
+{
+    public class <%= model.TableName %>Business : I<%= model.TableName %>Business
+    {
+        private readonly I<%= model.TableName %>Service _service;
+        public <%= model.TableName %>Business(I<%= model.TableName %>Service service)
+        {
+            _service = service;
+        }
+         
+        public  ServiceResult<List<<%= model.TableName %>>> PageListQuery(<%= model.TableName %> model, PagingInfo pager = null)
+        {
+        	var response=new ServiceResult<List<<%= model.TableName %>>> (){ IsSuccess = true, Message="操作成功" };
+            List<<%= model.TableName %>> result = null;
+            if (null != pager && pager.PageIndex > 0 && pager.PageSize > 0)
+            {
+                result = _service.PageListQuery(model, pager);
+            }
+            else
+            {
+                result = _service.ListQuery(model);
+            }
+
+            if (null == result||result.Count==0)
+            {
+                response.Value=new  List<<%= model.TableName %>>();               
+                return response;
+            }
+
+            response.Value = result; 
+            response.Pager = new PagingInfo() { DataCount = result.FirstOrDefault().Row };
+            return response;
+        }
+
+        public ServiceResult Delete(int id, string userId)
+        {
+            int result = 0;
+            var response = new ServiceResult() { IsSuccess = false, Message = "操作失败" };
+
+            if (id <= 0)
+            {
+                response.Message = "编号不能为空";
+            }
+            if (string.IsNullOrWhiteSpace(userId))
+            {
+                response.Message = "用户信息不能为空";
+            }
+            var data = _service.ListQuery(new <%= model.TableName %>() { Id = id, IsDelete = false });
+            if (null == data || null == data.FirstOrDefault())
+            {
+                response.Message = "删除记录不存在";
+            }
+
+            try
+            {
+                result = _service.Delete(id, userId);
+            }
+            catch (Exception ex)
+            {
+                response.Message = ex.Message;
+            }
+
+            if (result>0)
+            {
+                response.IsSuccess = true;
+                response.Message = "操作成功";
+            }
+            
+            return response;
+        }
+       
+        public  ServiceResult AddOrUpdate(<%= model.TableName %> model)
+        {
+        	var response=new ServiceResult(){ IsSuccess = false, Message="操作失败"  };
+            try
+            {
+                <%= model.TableName %> data = null;
+                if (model.Id > 0)
+                {
+                    data = _service.ListQuery(new <%= model.TableName %>() { Id=model.Id}).FirstOrDefault();
+                }
+
+                if (null == data && model.Id > 0)
+                {
+                    response.Message = "记录不存在";
+                    return response;
+                }
+                int result = 0;
+                if (model.Id > 0)
+                {
+                    result = _service.Update(PackingModel(data, model));
+                }
+                else
+                {
+                    result = _service.Add(model);
+                }
+
+                if (result > 0)
+                {
+                    response.IsSuccess = true;
+                    response.Message = "操作成功";
+                }
+            }
+            catch (Exception ex)
+            {
+                response.Message = ex.Message;
+            }
+        	
+        	return response; 
+        }
+
+        private <%= model.TableName %> PackingModel(<%= model.TableName %> data,<%= model.TableName %> model)
+        {
+<% model.Clumns&&model.Clumns.forEach(function(clumn){ if(["LastUpdateTime","IsDelete","StoreId","HeadquarterId","CreateUser","CreateTime"].indexOf(clumn.AttributeName)==-1) {%>            data.<%= clumn.AttributeName %> = model.<%= clumn.AttributeName %>;
+<% } }); %>            data.LastUpdateTime =DateTime.Now;
+        	return data;
+        }
+ 
+    }
+}

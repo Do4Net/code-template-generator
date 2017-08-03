@@ -1,0 +1,43 @@
+using EP.Community.Entity;
+using Shangpin.EP.Framework.Database;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace EP.Community.Service
+{
+    public class <%= model.TableName %>Service : I<%= model.TableName %>Service
+    {
+
+        public List<<%= model.TableName %>> PageListQuery(<%= model.TableName %> model,PagingInfo pager)
+        {
+            return DapperFactoy.CreateDapper().Query<<%= model.TableName %>>("CustomerDB_<%= model.TableName %>_PageQuery"
+                , new
+                {<% model.Clumns&&model.Clumns.forEach(function(clumn){ if(["LastUpdateTime","LastUpdateUser","IsDelete","StoreId","HeadquarterId","CreateUser","CreateTime"].indexOf(clumn.AttributeName)==-1) {%> 
+                    <%= clumn.AttributeName %> = model.<%= clumn.AttributeName %>,<% }}); %>
+                    PageIndex = pager.PageIndex,
+                    PageSize = pager.PageSize 
+                }).ToList();
+        }
+        public List<<%= model.TableName %>> ListQuery(<%= model.TableName %> model )
+        {
+            return DapperFactoy.CreateDapper().Query<<%= model.TableName %>>("CustomerDB_<%= model.TableName %>_Query", model).ToList();
+        }
+        public int Add(<%= model.TableName %> model )
+        {
+            return DapperFactoy.CreateDapper().Execute("CustomerDB_<%= model.TableName %>_Add", model);
+        }
+
+        public int Update(<%= model.TableName %> model )
+        {
+            return  DapperFactoy.CreateDapper().Execute("CustomerDB_<%= model.TableName %>_Update", model);
+        }
+
+        public int Delete( int id , string userId )
+        {
+            return DapperFactoy.CreateDapper().Execute("CustomerDB_<%= model.TableName %>_Delete", new { LastUpdateUser = userId, Id = id });
+        }
+    }
+}

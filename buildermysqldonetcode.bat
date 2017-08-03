@@ -1,0 +1,3 @@
+node buildmysql.js
+
+pause
