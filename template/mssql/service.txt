@@ -15,7 +15,7 @@ namespace EP.Community.Service
         {
             return DapperFactoy.CreateDapper().Query<<%= model.TableName %>>("CustomerDB_<%= model.TableName %>_PageQuery"
                 , new
-                {<% model.Clumns&&model.Clumns.forEach(function(clumn){ if(["LastUpdateTime","LastUpdateUser","IsDelete","StoreId","HeadquarterId","CreateUser","CreateTime"].indexOf(clumn.AttributeName)==-1) {%> 
+                {<% model.Clumns&&model.Clumns.forEach(function(clumn){ if(model.Ignore.indexOf(clumn.AttributeName)==-1) {%> 
                     <%= clumn.AttributeName %> = model.<%= clumn.AttributeName %>,<% }}); %>
                     PageIndex = pager.PageIndex,
                     PageSize = pager.PageSize 

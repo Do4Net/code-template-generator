@@ -34,7 +34,7 @@ const
 
 /**
   正则
-  // g（全局搜索出现的所有 pattern）
+  // g（全局搜索出现的所有 pattern）  全局标志(g)，test()函数仍然只查找最多一个匹配，不过我们再次调用该对象的test()函数就可以查找下一个匹配 手动调整：regex.lastIndex = 0;
   // i（忽略大小写）
   // m 多行搜索
 **/
@@ -138,13 +138,15 @@ function writeFile(table,targetPath,code,desc){
   })
 }
 
-function buildClass(table,build,callback){
+function buildClass(table,build,callback,handler){
 
   var entityTmp=fs.readFileSync(build.Template).toString("utf-8"); 
   var targetPath=tmpl.simpTmplParse(build.OutPutFile,table);
 
-  if(callback){
-      return callback(table,targetPath,tmpl.funcTmplParse(entityTmp,table),build.Desc);  
+  callback&&callback(table);
+
+  if(handler){
+      return handler(table,targetPath,tmpl.funcTmplParse(entityTmp,table),build.Desc);  
   } 
 
   writeFile(table,targetPath,tmpl.funcTmplParse(entityTmp,table),build.Desc); 
@@ -168,17 +170,31 @@ function startBuild(table,callback){
  console.log(`-----------------C# code ${table.TableName} ${/(\d{2}:\d{2}:\d{2})/.exec(new Date())[1]}------------------------`);
   with(buildConfig){ 
     
-    BuildContract.Enable&&buildClass(table,BuildContract);
+    BuildContract.Enable&&buildClass(table,BuildContract,function(table){
+      table["Ignore"] = BuildContract.Ignore||[];
+    });
  
-    BuildEntityClass.Enable&&buildClass(table,BuildEntityClass);
+    BuildEntityClass.Enable&&buildClass(table,BuildEntityClass,function(table){
+      table["Ignore"] = BuildEntityClass.Ignore||[];
+    });
     
-    BuildIBusiness.Enable&&buildClass(table,BuildIBusiness);
+    BuildIBusiness.Enable&&buildClass(table,BuildIBusiness,function(table){
+      table["Ignore"] = BuildIBusiness.Ignore||[];
+    });
 
-    BuildBusiness.Enable&&buildClass(table,BuildBusiness);
+    BuildBusiness.Enable&&buildClass(table,BuildBusiness,function(table){
+      table["Ignore"] = BuildBusiness.Ignore||[];
+    });
 
-    BuildIService.Enable&&buildClass(table,BuildIService);
+    BuildIService.Enable&&buildClass(table,BuildIService,function(table){
+      table["Ignore"] = BuildIService.Ignore||[];
+    });
 
-    BuildService.Enable&&buildClass(table,BuildService); 
+    BuildService.Enable&&buildClass(table,BuildService,function(table){
+      table["Ignore"] = BuildService.Ignore||[];
+    }); 
+
+    //BuildSqlTemplate.Enable && buildClass(table,BuildSqlTemplate);
   }
  }
 
@@ -247,13 +263,19 @@ function buildQuerySql(tableName){
 
       table.Clumns.forEach(function(clumn){
          var type=dbType[`${(clumn.IsNull ?"DEFAULT":"NOT")}NULL${clumn.AttributeType}`];
-        clumn["AttributeType"]=type;
-        clumn["AttributeDesc"]=clumn.AttributeDesc; 
-        clumn["AttributeCondition"]=queryCondition(type,clumn.AttributeName,true);
+        clumn["AttributeType"]      = type;
+        clumn["AttributeDesc"]      = clumn.AttributeDesc; 
+        clumn["AttributeCondition"] = queryCondition(type,clumn.AttributeName,true);
       })   
 
-      buildConfig.BuildSqlTemplate.Enable && buildClass(table,buildConfig.BuildSqlTemplate);
-      buildConfig.BuildSqlSelete.Enable && buildClass(table,buildConfig.BuildSqlSelete);
+      buildConfig.BuildSqlTemplate.Enable && buildClass(table,buildConfig.BuildSqlTemplate,function(table){
+        table["Ignore"]       = buildConfig.BuildSqlTemplate.Ignore||[];
+        table["AddIgnore"]    = buildConfig.BuildSqlTemplate.AddIgnore||[];
+        table["UpdateIgnore"] = buildConfig.BuildSqlTemplate.UpdateIgnore||[];
+      });
+      buildConfig.BuildSqlSelete.Enable && buildClass(table,buildConfig.BuildSqlSelete,function(table){
+         table["Ignore"]       = buildConfig.BuildSqlSelete.Ignore||[];
+      });
   })
 }
 

@@ -5,7 +5,10 @@ module.exports={
 		Enable		:true, 
 		OutPutFile	:"E:\\Community\\CodeManager\\EP.Community\\EP.Community.Configuration\\Dapper\\_f_<%=TableName%>_nolock.xml",
 		Template 	:"./template/mssql/sqltemplate.txt",
-		Desc 		:"sql模板"
+		Desc 		:"sql模板",
+		Ignore		:["LastUpdateTime","LastUpdateUser","IsDelete","StoreId","HeadquarterId","CreateUser","CreateTime"],
+		AddIgnore	:["Id","LastUpdateUser","LastUpdateTime"],
+		UpdateIgnore:["Id","MemberId","CreateTime","CreateUser","IsDelete","FK_MemberId"]
 	},
 	BuildSqlSelete:{	
 		Enable		:true, 
@@ -17,7 +20,8 @@ module.exports={
 		Enable		:true, 
 		OutPutFile	:"E:\\Community\\CodeManager\\EP.Community\\EP.Community.Entity\\Member\\<%=TableName%>.cs",
 		Template 	:"./template/mssql/entity.txt",
-		Desc 		:"实体类"
+		Desc 		:"实体类",
+		Ignore		:["LastUpdateTime","IsDelete","LastUpdateUser","StoreId","HeadquarterId","CreateUser","CreateTime"]
 	},
 	BuildContract:{
 		Enable		:true, 
@@ -35,7 +39,8 @@ module.exports={
 		Enable		:true, 
 		OutPutFile	:"E:\\Community\\CodeManager\\EP.Community\\EP.Community.Business\\<%=TableName%>\\<%=TableName%>Business.cs",
 		Template 	:"./template/mssql/business.txt",
-		Desc		:"业务逻辑层实现"
+		Desc		:"业务逻辑层实现",
+		Ignore 		:["LastUpdateTime","IsDelete","StoreId","HeadquarterId","CreateUser","CreateTime","Id","FK_MemberId"]
 	},
 	BuildIService:{
 		Enable		:true, 
@@ -47,6 +52,7 @@ module.exports={
 		Enable		:true, 
 		OutPutFile	:"E:\\Community\\CodeManager\\EP.Community\\EP.Community.Service\\<%=TableName%>\\<%=TableName%>Service.cs",
 		Template 	:"./template/mssql/service.txt",
-		Desc		:"数据操作层实现"
+		Desc		:"数据操作层实现",
+		Ignore 		:["LastUpdateTime","LastUpdateUser","IsDelete","StoreId","HeadquarterId","CreateUser","CreateTime"]
 	}
 }

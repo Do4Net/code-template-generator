@@ -119,7 +119,7 @@ namespace EP.Community.Business
 
         private <%= model.TableName %> PackingModel(<%= model.TableName %> data,<%= model.TableName %> model)
         {
-<% model.Clumns&&model.Clumns.forEach(function(clumn){ if(["LastUpdateTime","IsDelete","StoreId","HeadquarterId","CreateUser","CreateTime"].indexOf(clumn.AttributeName)==-1) {%>            data.<%= clumn.AttributeName %> = model.<%= clumn.AttributeName %>;
+<% model.Clumns&&model.Clumns.forEach(function(clumn){ if(model.Ignore.indexOf(clumn.AttributeName)==-1) {%>            data.<%= clumn.AttributeName %> = model.<%= clumn.AttributeName %>;
 <% } }); %>            data.LastUpdateTime =DateTime.Now;
         	return data;
         }
